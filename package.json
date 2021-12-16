@@ -43,7 +43,10 @@
   },
   "dependencies": {
     "dotenv": "^10.0.0",
+    "mysql": "^2.18.1",
+    "reflect-metadata": "^0.1.13",
     "sipgateio": "^2.5.6",
-    "ts-node": "^10.4.0"
+    "ts-node": "^10.4.0",
+    "typeorm": "^0.2.41"
   }
 }
