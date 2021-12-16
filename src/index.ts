@@ -1,17 +1,13 @@
-import "reflect-metadata";
 import * as dotenv from "dotenv";
+import "reflect-metadata";
 import { createWebhookModule, WebhookResponse } from "sipgateio";
+import { createConnection } from "typeorm";
+
+import { OrderStatus } from "./entities/Customer";
 
 dotenv.config();
 
 const MAX_CUSTOMERID_DTMF_INPUT_LENGTH = 8;
-
-enum OrderStatus {
-  RECEIVED,
-  PENDING,
-  FULLFILLED,
-  CANCELED,
-}
 
 if (!process.env.SIPGATE_WEBHOOK_SERVER_ADDRESS) {
   console.error(
@@ -50,33 +46,37 @@ const getAnnouncementByCustomerId = (customerId: string): string => {
   return getAnnouncementByOrderStatus(OrderStatus.PENDING);
 };
 
-createWebhookModule()
-  .createServer({
-    port: PORT,
-    serverAddress: SERVER_ADDRESS,
-  })
-  .then((webhookServer) => {
-    webhookServer.onNewCall((newCallEvent) => {
-      console.log(`New call from ${newCallEvent.from} to ${newCallEvent.to}`);
-      return WebhookResponse.gatherDTMF({
-        maxDigits: MAX_CUSTOMERID_DTMF_INPUT_LENGTH,
-        timeout: 5000,
-        announcement:
-          "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/request_customerid.wav?raw=true",
+createConnection().then(() => {
+  createWebhookModule()
+    .createServer({
+      port: PORT,
+      serverAddress: SERVER_ADDRESS,
+    })
+    .then((webhookServer) => {
+      webhookServer.onNewCall((newCallEvent) => {
+        console.log(`New call from ${newCallEvent.from} to ${newCallEvent.to}`);
+        return WebhookResponse.gatherDTMF({
+          maxDigits: MAX_CUSTOMERID_DTMF_INPUT_LENGTH,
+          timeout: 5000,
+          announcement:
+            "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/request_customerid.wav?raw=true",
+        });
+      });
+
+      webhookServer.onData((dataEvent) => {
+        const customerId = dataEvent.dtmf;
+        if (customerId.length === MAX_CUSTOMERID_DTMF_INPUT_LENGTH) {
+          console.log(
+            `The caller provided a valid customer id: ${customerId} `,
+          );
+
+          return WebhookResponse.gatherDTMF({
+            maxDigits: 1,
+            timeout: 0,
+            announcement: getAnnouncementByCustomerId(customerId),
+          });
+        }
+        return WebhookResponse.hangUpCall();
       });
     });
-
-    webhookServer.onData((dataEvent) => {
-      const customerId = dataEvent.dtmf;
-      if (customerId.length === MAX_CUSTOMERID_DTMF_INPUT_LENGTH) {
-        console.log(`The caller provided a valid customer id: ${customerId} `);
-
-        return WebhookResponse.gatherDTMF({
-          maxDigits: 1,
-          timeout: 0,
-          announcement: getAnnouncementByCustomerId(customerId),
-        });
-      }
-      return WebhookResponse.hangUpCall();
-    });
-  });
+});
