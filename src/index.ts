@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 import "reflect-metadata";
 import { createWebhookModule, WebhookResponse } from "sipgateio";
-import { createConnection } from "typeorm";
+import { createConnection as createDatabaseConnection } from "typeorm";
 
 import { OrderStatus } from "./entities/Customer";
 
@@ -46,7 +46,7 @@ const getAnnouncementByCustomerId = (customerId: string): string => {
   return getAnnouncementByOrderStatus(OrderStatus.PENDING);
 };
 
-createConnection().then(() => {
+createDatabaseConnection().then(() => {
   createWebhookModule()
     .createServer({
       port: PORT,
