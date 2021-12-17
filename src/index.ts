@@ -50,7 +50,11 @@ const getAnnouncementByCustomerId = async (
   customerId: string,
 ): Promise<string> => {
   const customer = await getDatabaseRepository(Customer).findOne(customerId);
-  return getAnnouncementByOrderStatus(customer ? customer.orderStatus : null);
+  if (!customer) {
+    console.log(`Customer with Id: ${customerId} not found...`);
+    return getAnnouncementByOrderStatus(null);
+  }
+  return getAnnouncementByOrderStatus(customer.orderStatus);
 };
 
 createDatabaseConnection().then(() => {
