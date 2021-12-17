@@ -54,12 +54,14 @@ const getAnnouncementByCustomerId = async (
 };
 
 createDatabaseConnection().then(() => {
+  console.log("Database connection established");
   createWebhookModule()
     .createServer({
       port: PORT,
       serverAddress: SERVER_ADDRESS,
     })
     .then((webhookServer) => {
+      console.log("Ready for new calls...");
       webhookServer.onNewCall((newCallEvent) => {
         console.log(`New call from ${newCallEvent.from} to ${newCallEvent.to}`);
         return WebhookResponse.gatherDTMF({
@@ -73,9 +75,7 @@ createDatabaseConnection().then(() => {
       webhookServer.onData(async (dataEvent) => {
         const customerId = dataEvent.dtmf;
         if (customerId.length === MAX_CUSTOMERID_DTMF_INPUT_LENGTH) {
-          console.log(
-            `The caller provided a valid customer id: ${customerId} `,
-          );
+          console.log(`The caller provided a customer id: ${customerId} `);
 
           return WebhookResponse.gatherDTMF({
             maxDigits: 1,

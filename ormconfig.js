@@ -16,7 +16,7 @@ module.exports = {
   username: DATABASE_USER,
   password: DATABASE_PASSWORD,
   database: DATABASE_NAME,
-  synchronize: true,
+  synchronize: false,
   entities: ["src/entities/**/*.ts"],
   migrations: ["src/migrations/**/*.ts"],
 };
