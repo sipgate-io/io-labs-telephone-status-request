@@ -5,6 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node .",
+    "database:init": "ts-node ./node_modules/.bin/typeorm migration:run",
+    "database:purge": "ts-node ./node_modules/.bin/typeorm migration:revert",
     "fix:lint": "eslint src --ext .ts,.js --fix",
     "test:lint": "eslint src --ext .ts,.js",
     "test:format": "prettier --check .",
