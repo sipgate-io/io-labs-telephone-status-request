@@ -1,9 +1,12 @@
 import * as dotenv from "dotenv";
 import "reflect-metadata";
 import { createWebhookModule, WebhookResponse } from "sipgateio";
-import { createConnection as createDatabaseConnection } from "typeorm";
+import {
+  createConnection as createDatabaseConnection,
+  getRepository as getDatabaseRepository,
+} from "typeorm";
 
-import { OrderStatus } from "./entities/Customer";
+import Customer, { OrderStatus } from "./entities/Customer";
 
 dotenv.config();
 
@@ -26,7 +29,9 @@ if (!process.env.SIPGATE_WEBHOOK_SERVER_PORT) {
 const SERVER_ADDRESS = process.env.SIPGATE_WEBHOOK_SERVER_ADDRESS;
 const PORT = process.env.SIPGATE_WEBHOOK_SERVER_PORT;
 
-const getAnnouncementByOrderStatus = (orderStatus: OrderStatus): string => {
+const getAnnouncementByOrderStatus = (
+  orderStatus: OrderStatus | null,
+): string => {
   switch (orderStatus) {
     case OrderStatus.RECEIVED:
       return "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/orderstatus_received.wav?raw=true";
@@ -41,9 +46,11 @@ const getAnnouncementByOrderStatus = (orderStatus: OrderStatus): string => {
   }
 };
 
-const getAnnouncementByCustomerId = (customerId: string): string => {
-  console.log(`getAnnouncementByCustomerId ${customerId}`);
-  return getAnnouncementByOrderStatus(OrderStatus.PENDING);
+const getAnnouncementByCustomerId = async (
+  customerId: string,
+): Promise<string> => {
+  const customer = await getDatabaseRepository(Customer).findOne(customerId);
+  return getAnnouncementByOrderStatus(customer ? customer.orderStatus : null);
 };
 
 createDatabaseConnection().then(() => {
@@ -63,7 +70,7 @@ createDatabaseConnection().then(() => {
         });
       });
 
-      webhookServer.onData((dataEvent) => {
+      webhookServer.onData(async (dataEvent) => {
         const customerId = dataEvent.dtmf;
         if (customerId.length === MAX_CUSTOMERID_DTMF_INPUT_LENGTH) {
           console.log(
@@ -73,7 +80,7 @@ createDatabaseConnection().then(() => {
           return WebhookResponse.gatherDTMF({
             maxDigits: 1,
             timeout: 0,
-            announcement: getAnnouncementByCustomerId(customerId),
+            announcement: await getAnnouncementByCustomerId(customerId),
           });
         }
         return WebhookResponse.hangUpCall();
