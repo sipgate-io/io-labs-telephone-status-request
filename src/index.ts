@@ -37,8 +37,8 @@ const getAnnouncementByOrderStatus = (
       return "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/orderstatus_received.wav?raw=true";
     case OrderStatus.PENDING:
       return "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/orderstatus_pending.wav?raw=true";
-    case OrderStatus.FULLFILLED:
-      return "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/orderstatus_fullfilled.wav?raw=true";
+    case OrderStatus.FULFILLED:
+      return "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/orderstatus_fulfilled.wav?raw=true";
     case OrderStatus.CANCELED:
       return "https://github.com/sipgate-io/io-labs-telephone-status-request/blob/main/static/orderstatus_canceled.wav?raw=true";
     default:

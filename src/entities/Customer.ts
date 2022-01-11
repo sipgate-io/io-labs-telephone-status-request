@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export enum OrderStatus {
   RECEIVED,
   PENDING,
-  FULLFILLED,
+  FULFILLED,
   CANCELED,
 }
 

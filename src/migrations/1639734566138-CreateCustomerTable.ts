@@ -37,7 +37,7 @@ export default class CreateCustomerTable1639734566138
       },
       {
         id: 22222222,
-        orderStatus: OrderStatus.FULLFILLED,
+        orderStatus: OrderStatus.FULFILLED,
       },
       {
         id: 33333333,
